@@ -5,7 +5,7 @@
 // associated with an assembly.
 [assembly: AssemblyTitle("NWebDav.Sample.Kestrel")]
 [assembly: AssemblyDescription("WebDAV server sample application (using Kestrel)")]
-[assembly: AssemblyInformationalVersion("0.1.19.0 (alpha)")]
+[assembly: AssemblyInformationalVersion("0.1.24.0 (alpha)")]
 #if DEBUG
 [assembly: AssemblyConfiguration("DEBUG")]
 #else
@@ -13,7 +13,7 @@
 #endif
 [assembly: AssemblyCompany("Ramon de Klein <mail@ramondeklein.nl>")]
 [assembly: AssemblyProduct("NWebDav")]
-[assembly: AssemblyCopyright("Copyright (C) 2016 Ramon de Klein")]
+[assembly: AssemblyCopyright("Copyright (C) 2016-2017 Ramon de Klein")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -25,5 +25,5 @@
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.1.19.0")]
-[assembly: AssemblyFileVersion("0.1.19.0")]
+[assembly: AssemblyVersion("0.1.24.0")]
+[assembly: AssemblyFileVersion("0.1.24.0")]

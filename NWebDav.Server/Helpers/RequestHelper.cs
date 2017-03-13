@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -66,16 +67,21 @@ namespace NWebDav.Server.Helpers
         /// </returns>
         public static SplitUri SplitUri(Uri uri)
         {
+            // Strip a trailing slash
+            var trimmedUri = uri.AbsoluteUri;
+            if (trimmedUri.EndsWith("/"))
+                trimmedUri = trimmedUri.Substring(0, trimmedUri.Length - 1);
+
             // Determine the offset of the name
-            var slashOffset = uri.AbsoluteUri.LastIndexOf('/');
+            var slashOffset = trimmedUri.LastIndexOf('/');
             if (slashOffset == -1)
                 return null;
 
             // Separate name from path
             return new SplitUri
             {
-                CollectionUri = new Uri(uri.AbsoluteUri.Substring(0, slashOffset)),
-                Name = Uri.UnescapeDataString(uri.AbsoluteUri.Substring(slashOffset + 1))
+                CollectionUri = new Uri(trimmedUri.Substring(0, slashOffset)),
+                Name = Uri.UnescapeDataString(trimmedUri.Substring(slashOffset + 1))
             };
         }
 
@@ -90,17 +96,12 @@ namespace NWebDav.Server.Helpers
         public static Uri GetDestinationUri(this IHttpRequest request)
         {
             // Obtain the destination
-            string destinationHeader = request.GetHeaderValue("Destination");
-            
+            var destinationHeader = request.GetHeaderValue("Destination");
             if (destinationHeader == null)
                 return null;
 
             // Create the destination URI
-            var uri = destinationHeader.StartsWith("/")
-                ? new Uri(request.Url, destinationHeader)
-                : new Uri(destinationHeader);
-
-            return uri;
+            return destinationHeader.StartsWith("/") ? new Uri(request.Url, destinationHeader) : new Uri(destinationHeader);
         }        
 
         /// <summary>
@@ -268,7 +269,7 @@ namespace NWebDav.Server.Helpers
                 // then we need to return the entire file, so we will act as if no
                 // range was specified at all.
                 DateTime dt;
-                if (!DateTime.TryParse(ifRangeHeader, out dt))
+                if (!DateTime.TryParse(ifRangeHeader, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
                     return null;
 
                 // Use the date for the 'If'
