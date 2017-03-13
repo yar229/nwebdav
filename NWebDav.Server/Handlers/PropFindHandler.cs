@@ -126,6 +126,9 @@ namespace NWebDav.Server.Handlers
 
                 // Create tags for property values
                 var xPropStatValues = new XElement(WebDavNamespaces.DavNs + "propstat");
+                var xProp = new XElement(WebDavNamespaces.DavNs + "prop");
+                xPropStatValues.Add(xProp);
+
 
                 // Check if the entry supports properties
                 var propertyManager = entry.Entry.PropertyManager;
@@ -147,13 +150,13 @@ namespace NWebDav.Server.Handlers
                         if ((propertyMode & PropertyMode.AllProperties) != 0)
                         {
                             foreach (var propertyName in propertyManager.Properties.Where(p => !p.IsExpensive).Select(p => p.Name))
-                                await AddPropertyAsync(httpContext, xResponse, xPropStatValues, propertyManager, entry.Entry, propertyName, addedProperties).ConfigureAwait(false);
+                                await AddPropertyAsync(httpContext, xResponse, xProp, propertyManager, entry.Entry, propertyName, addedProperties).ConfigureAwait(false);
                         }
 
                         if ((propertyMode & PropertyMode.SelectedProperties) != 0)
                         {
                             foreach (var propertyName in propertyList)
-                                await AddPropertyAsync(httpContext, xResponse, xPropStatValues, propertyManager, entry.Entry, propertyName, addedProperties).ConfigureAwait(false);
+                                await AddPropertyAsync(httpContext, xResponse, xProp, propertyManager, entry.Entry, propertyName, addedProperties).ConfigureAwait(false);
                         }
 
                         // Add the values (if any)
@@ -188,15 +191,18 @@ namespace NWebDav.Server.Handlers
                         var value = await propertyManager.GetPropertyAsync(httpContext, item, propertyName).ConfigureAwait(false);
                         if (value is XElement)
                         {
-                            xPropStatValues.Add(new XElement(WebDavNamespaces.DavNs + "prop", new XElement(propertyName, (XElement) value)));
+                            //xPropStatValues.Add(new XElement(WebDavNamespaces.DavNs + "prop", new XElement(propertyName, (XElement)value)));
+                            xPropStatValues.Add(new XElement(propertyName, (XElement)value));
                         }
                         else if (value is IEnumerable<XElement>)
                         {
-                            xPropStatValues.Add(new XElement(WebDavNamespaces.DavNs + "prop", new XElement(propertyName, ((IEnumerable<XElement>) value).Cast<object>().ToArray())));
+                            //xPropStatValues.Add(new XElement(WebDavNamespaces.DavNs + "prop", new XElement(propertyName, ((IEnumerable<XElement>)value).Cast<object>().ToArray())));
+                            xPropStatValues.Add(new XElement(propertyName, ((IEnumerable<XElement>)value).Cast<object>().ToArray()));
                         }
                         else
                         {
-                            xPropStatValues.Add(new XElement(WebDavNamespaces.DavNs + "prop", new XElement(propertyName, value)));
+                            //xPropStatValues.Add(new XElement(WebDavNamespaces.DavNs + "prop", new XElement(propertyName, value)));
+                            xPropStatValues.Add(new XElement(propertyName, value));
                         }
                     }
                     else
