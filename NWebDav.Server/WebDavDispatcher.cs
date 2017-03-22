@@ -90,6 +90,10 @@ namespace NWebDav.Server
 
             // Determine the request log-string
             var logRequest = $"{request.HttpMethod}:{request.Url}:{request.RemoteEndPoint}";
+            var range = request.GetRange();
+            if (null != range)
+                logRequest += $" ({range.Start?.ToString() ?? string.Empty}-{range.End?.ToString() ?? string.Empty})";
+
 
             // Log the request
             s_log.Log(LogLevel.Info, () => $"{logRequest} - Start processing");
