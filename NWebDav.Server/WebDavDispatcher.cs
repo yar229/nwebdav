@@ -96,7 +96,7 @@ namespace NWebDav.Server
 
 
             // Log the request
-            s_log.Log(LogLevel.Info, () => $"{logRequest} - Start processing");
+            s_log.Log(LogLevel.Info, () => $"{logRequest} - Processing");
 
             try
             {
@@ -140,7 +140,7 @@ namespace NWebDav.Server
                     if (await requestHandler.HandleRequestAsync(httpContext, _store).ConfigureAwait(false))
                     {
                         // Log processing duration
-                        s_log.Log(LogLevel.Info, () => $"{logRequest} - Finished processing ({sw.ElapsedMilliseconds}ms, HTTP result: {httpContext.Response.Status})");
+                        s_log.Log(LogLevel.Info, () => $"{logRequest} - Finished ({sw.ElapsedMilliseconds}ms, HTTP {httpContext.Response.Status})");
                     }
                     else
                     {
