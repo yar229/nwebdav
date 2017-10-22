@@ -83,7 +83,9 @@ namespace NWebDav.Server.Helpers
 #else
                     Indent = false,
 #endif
-                    Encoding = Encoding.UTF8,
+                    //Encoding = Encoding.UTF8,
+                    //supress BOM (WebDrive not working)
+                    Encoding = new UTF8Encoding(false)
                 }))
                 {
                     // Add the namespaces (Win7 WebDAV client requires them like this)
