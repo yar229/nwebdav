@@ -84,8 +84,7 @@ namespace NWebDav.Server.Helpers
                     Indent = false,
 #endif
                     //Encoding = Encoding.UTF8,
-                    //supress BOM (WebDrive not working)
-                    Encoding = new UTF8Encoding(false)
+                    Encoding = _encoding
                 }))
                 {
                     // Add the namespaces (Win7 WebDAV client requires them like this)
@@ -118,5 +117,7 @@ namespace NWebDav.Server.Helpers
                 await ms.CopyToAsync(response.Stream).ConfigureAwait(false);
             }
         }
+
+        private static Encoding _encoding = new UTF8Encoding(false); //supress BOM (WebDrive not working)
     }
 }
