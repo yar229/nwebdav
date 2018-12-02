@@ -89,9 +89,9 @@ namespace NWebDav.Server.Handlers
                 }
             }
 
-            public XElement GetXmlMultiStatus(Uri uri)
+            public XElement GetXmlMultiStatus(WebDavUri uri)
             {
-                var xResponse = new XElement(WebDavNamespaces.DavNs + "response", new XElement(WebDavNamespaces.DavNs + "href", UriHelper.ToEncodedString(uri)));
+                var xResponse = new XElement(WebDavNamespaces.DavNs + "response", new XElement(WebDavNamespaces.DavNs + "href", uri));
                 var xMultiStatus = new XElement(WebDavNamespaces.DavNs + "multistatus", xResponse);
                 foreach (var result in PropertySetters.Where(ps => ps.Result != DavStatusCode.Ok))
                     xResponse.Add(result.GetXmlResponse());
@@ -140,7 +140,7 @@ namespace NWebDav.Server.Handlers
             }
 
             // Scan each property
-            foreach (var propSet in propSetCollection)
+            foreach (var propSet in propSetCollection.PropertySetters)
             {
                 // Set the property
                 DavStatusCode result;
@@ -148,7 +148,7 @@ namespace NWebDav.Server.Handlers
                 {
                     result = await item.PropertyManager.SetPropertyAsync(httpContext, item, propSet.Name, propSet.Value).ConfigureAwait(false);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     result = DavStatusCode.Forbidden;
                 }

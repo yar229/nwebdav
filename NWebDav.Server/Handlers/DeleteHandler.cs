@@ -97,7 +97,7 @@ namespace NWebDav.Server.Handlers
             return true;
         }
 
-        private async Task<DavStatusCode> DeleteItemAsync(IStoreCollection collection, string name, IHttpContext httpContext, Uri baseUri, UriResultCollection errors)
+        private async Task<DavStatusCode> DeleteItemAsync(IStoreCollection collection, string name, IHttpContext httpContext, WebDavUri baseUri, UriResultCollection errors)
         {
             // Obtain the actual item
             var deleteCollection = await collection.GetItemAsync(name, httpContext).ConfigureAwait(false) as IStoreCollection;
@@ -108,7 +108,7 @@ namespace NWebDav.Server.Handlers
 
                 // Delete all entries first
                 foreach (var entry in await deleteCollection.GetItemsAsync(httpContext).ConfigureAwait(false))
-                    await DeleteItemAsync(deleteCollection, entry.Name, httpContext, subBaseUri, errors);
+                    await DeleteItemAsync(deleteCollection, entry.Name, httpContext, subBaseUri, errors).ConfigureAwait(false);
             }
 
             // Attempt to delete the item

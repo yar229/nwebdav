@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -169,10 +170,33 @@ namespace NWebDav.Server.Props
         private class Rfc1123DateConverter : IConverter
         {
             public object ToXml(IHttpContext httpContext, DateTime value) => value.ToString("R");
-            public DateTime FromXml(IHttpContext httpContext, object value) => DateTime.Parse((string)value, CultureInfo.InvariantCulture);
+            public DateTime FromXml(IHttpContext httpContext, object value)
+            {
+                bool parsed = DateTime.TryParse((string) value, CultureInfo.InvariantCulture, DateTimeStyles.None, out var date);
+                if (!parsed)
+                {
+                    // try to fix wrong datetime, for example, Far+NetBox send "0023, 23 11 2017 21:0223 'GMT'"
+                    var m = Regex.Match((string) value,
+                        @"(?<day>\d{1,2})(-|\s+)(?<month>\d\d)(-|\s)(?<year>\d\d\d\d)(-|\s)(?<hour>\d\d):(?<min>\d\d):?(?<sec>\d\d)?");
+                    if (m.Success)
+                    {
+                        int year = int.Parse(m.Groups["year"].Value),
+                            month = int.Parse(m.Groups["month"].Value),
+                            day = int.Parse(m.Groups["day"].Value),
+                            hour = int.Parse(m.Groups["hour"].Value),
+                            min = int.Parse(m.Groups["min"].Value),
+                            sec = string.IsNullOrEmpty(m.Groups["sec"].Value) ? 0 : int.Parse(m.Groups["sec"].Value);
+
+                        date = new DateTime(year, month, day, hour, min, sec).ToLocalTime();
+                    }
+                    else
+                        throw new FormatException($"\"{(string)value}\" does not contain a valid string representation of a date and time.");
+                }
+                return date;
+            }
         }
 
-        private static IConverter TypeConverter { get; } = new Rfc1123DateConverter();
+        public static IConverter TypeConverter { get; } = new Rfc1123DateConverter();
 
         /// <summary>
         /// Converter to map RFC1123 dates to/from a <see cref="DateTime"/>.
@@ -216,7 +240,7 @@ namespace NWebDav.Server.Props
             }
         }
 
-        private static IConverter TypeConverter { get; } = new Iso8601DateConverter();
+        public static IConverter TypeConverter { get; } = new Iso8601DateConverter();
 
         /// <summary>
         /// Converter to map ISO 8601 dates to/from a <see cref="DateTime"/>.
@@ -239,7 +263,7 @@ namespace NWebDav.Server.Props
             public Boolean FromXml(IHttpContext httpContext, object value) => int.Parse(value.ToString()) != 0;
         }
 
-        private static IConverter TypeConverter { get; } = new BooleanConverter();
+        public static IConverter TypeConverter { get; } = new BooleanConverter();
 
         /// <summary>
         /// Converter to map an XML boolean to/from a <see cref="bool"/>.
@@ -262,7 +286,7 @@ namespace NWebDav.Server.Props
             public string FromXml(IHttpContext httpContext, object value) => value.ToString();
         }
 
-        private static IConverter TypeConverter { get; } = new StringConverter();
+        public static IConverter TypeConverter { get; } = new StringConverter();
 
         /// <summary>
         /// Converter to map an XML string to/from a <see cref="string"/>.
@@ -285,7 +309,7 @@ namespace NWebDav.Server.Props
             public Int32 FromXml(IHttpContext httpContext, object value) => int.Parse(value.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture);
         }
 
-        private static IConverter TypeConverter { get; } = new Int32Converter();
+        public static IConverter TypeConverter { get; } = new Int32Converter();
 
         /// <summary>
         /// Converter to map an XML number to/from a <see cref="int"/>.
@@ -308,7 +332,7 @@ namespace NWebDav.Server.Props
             public Int64 FromXml(IHttpContext httpContext, object value) => int.Parse(value.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture);
         }
 
-        private static IConverter TypeConverter { get; } = new Int64Converter();
+        public static IConverter TypeConverter { get; } = new Int64Converter();
 
         /// <summary>
         /// Converter to map an XML number to/from a <see cref="long"/>.
@@ -331,7 +355,7 @@ namespace NWebDav.Server.Props
             public IEnumerable<XElement> FromXml(IHttpContext httpContext, object value) => (IEnumerable<XElement>)value;
         }
 
-        private static IConverter TypeConverter { get; } = new XElementArrayConverter();
+        public static IConverter TypeConverter { get; } = new XElementArrayConverter();
 
         /// <summary>
         /// Converter to map an XML number to/from an <see cref="XElement"/> array.
@@ -354,7 +378,7 @@ namespace NWebDav.Server.Props
             public XElement FromXml(IHttpContext httpContext, object value) => (XElement)value;
         }
 
-        private static IConverter TypeConverter { get; } = new XElementConverter();
+        public static IConverter TypeConverter { get; } = new XElementConverter();
 
         /// <summary>
         /// Converter to map an XML number to/from a <see cref="XElement"/>.
@@ -377,7 +401,7 @@ namespace NWebDav.Server.Props
             public Uri FromXml(IHttpContext httpContext, object value) => new Uri((string)value);
         }
 
-        private static IConverter TypeConverter { get; } = new UriConverter();
+        public static IConverter TypeConverter { get; } = new UriConverter();
 
         /// <summary>
         /// Converter to map an XML string to/from a <see cref="Uri"/>.
